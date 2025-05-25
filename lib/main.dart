@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/word_provider.dart';
+import 'services/auth_service.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize AuthService
+  final authService = AuthService();
+  await authService.initialize();
+
   runApp(const MyApp());
 }
 

@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/word.dart';
+import '../config/api_config.dart';
 
 class AuthService {
-  // Change this to your backend server URL
-  static const String baseUrl = 'http://localhost:3000/api';
+  // Use the centralized API configuration
+  static String get baseUrl => ApiConfig.baseUrl;
 
   String? _token;
   String? _userId;

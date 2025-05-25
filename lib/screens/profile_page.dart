@@ -7,6 +7,16 @@ class ProfilePage extends StatelessWidget {
 
   ProfilePage({super.key});
 
+  // Format date for display
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
+
   Future<void> _signOut(BuildContext context) async {
     try {
       await _authService.signOut();
@@ -63,6 +73,21 @@ class ProfilePage extends StatelessWidget {
               'User ID: ${_authService.userId ?? 'Unknown'}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            const SizedBox(height: 4),
+
+            // Account creation date
+            if (user?['createdAt'] != null)
+              Text(
+                'Member since: ${_formatDate(user!['createdAt'])}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+
+            // Last login
+            if (user?['lastLogin'] != null)
+              Text(
+                'Last login: ${_formatDate(user!['lastLogin'])}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             const SizedBox(height: 40),
 
             // Account information section

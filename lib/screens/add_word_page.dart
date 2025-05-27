@@ -79,14 +79,26 @@ class _AddWordPageState extends State<AddWordPage> {
     super.dispose();
   }
 
-  void _saveWord() {
+  void _saveWord() async {
     if (_formKey.currentState!.validate()) {
       // Build translations map
       final Map<String, String> translations = {};
       for (var controllers in _translationControllers) {
         final language = controllers['language']!.text.trim();
         final translation = controllers['translation']!.text.trim();
-        translations[language] = translation;
+        if (language.isNotEmpty && translation.isNotEmpty) {
+          translations[language] = translation;
+        }
+      }
+
+      if (translations.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please add at least one translation'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
       }
 
       final word = Word(
@@ -96,20 +108,57 @@ class _AddWordPageState extends State<AddWordPage> {
             _exampleController.text.trim().isEmpty
                 ? null
                 : _exampleController.text.trim(),
+        createdAt: widget.wordToEdit?.createdAt ?? DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
       final wordProvider = Provider.of<WordProvider>(context, listen: false);
 
-      if (widget.wordToEdit != null && widget.wordIndex != null) {
-        // Update existing word
-        wordProvider.updateWord(widget.wordIndex!, word);
-      } else {
-        // Add new word
-        wordProvider.addWord(word);
-      }
+      try {
+        // Show loading indicator
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
 
-      // Navigate back to home page
-      Navigator.of(context).pop();
+        if (widget.wordToEdit != null && widget.wordIndex != null) {
+          // Update existing word
+          await wordProvider.updateWord(widget.wordIndex!, word);
+        } else {
+          // Add new word
+          await wordProvider.addWord(word);
+        }
+
+        // Close loading dialog
+        Navigator.of(context).pop();
+        
+        // Navigate back to home page
+        Navigator.of(context).pop();
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.wordToEdit != null 
+                ? 'Word updated successfully' 
+                : 'Word added successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        // Close loading dialog
+        Navigator.of(context).pop();
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

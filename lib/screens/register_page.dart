@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../providers/word_provider.dart';
 import 'home_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -39,12 +41,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       // Create user with AuthService
-      final result = await _authService.register(
+      await _authService.register(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
       if (!mounted) return;
+
+      // Refresh WordProvider to recognize new authentication state
+      final wordProvider = Provider.of<WordProvider>(context, listen: false);
+      await wordProvider.loadWords();
 
       // Navigate to home page on success
       Navigator.of(

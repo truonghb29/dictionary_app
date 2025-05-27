@@ -5,7 +5,7 @@ const connectDB = require('./config/database');
 
 // Import routes
 const authRoutes = require('./routes/auth');
-const dictionaryRoutes = require('./routes/dictionary');
+const userWordsRoutes = require('./routes/user-words');
 
 // Connect to database
 connectDB();
@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/dictionary', dictionaryRoutes);
+app.use('/api/user', userWordsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

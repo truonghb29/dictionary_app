@@ -5,6 +5,11 @@ import '../models/word.dart';
 import '../config/api_config.dart';
 
 class AuthService {
+  // Singleton pattern
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() => _instance;
+  AuthService._internal();
+
   // Use the centralized API configuration
   static String get baseUrl => ApiConfig.baseUrl;
 
@@ -149,11 +154,7 @@ class AuthService {
       final wordsData =
           words
               .map(
-                (word) => {
-                  'term': word.term,
-                  'translations': word.translations,
-                  'example': word.example,
-                },
+                (word) => word.toJson(),
               )
               .toList();
 
@@ -188,11 +189,7 @@ class AuthService {
         final List<dynamic> wordsData = data['words'] ?? [];
 
         return wordsData.map((wordData) {
-          return Word(
-            term: wordData['term'],
-            translations: Map<String, String>.from(wordData['translations']),
-            example: wordData['example'],
-          );
+          return Word.fromJson(wordData);
         }).toList();
       } else {
         print('Error loading words: ${response.statusCode}');
@@ -201,52 +198,6 @@ class AuthService {
     } catch (e) {
       print('Error loading words from MongoDB: $e');
       return [];
-    }
-  }
-
-  // Add a single word
-  Future<void> addWord(Word word) async {
-    if (!isUserLoggedIn) return;
-
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/dictionary/words'),
-        headers: _getAuthHeaders(),
-        body: jsonEncode({
-          'term': word.term,
-          'translations': word.translations,
-          'example': word.example,
-        }),
-      );
-
-      if (response.statusCode != 201) {
-        final error = jsonDecode(response.body);
-        throw Exception(error['message'] ?? 'Failed to add word');
-      }
-    } catch (e) {
-      print('Error adding word to MongoDB: $e');
-      rethrow;
-    }
-  }
-
-  // Delete a word
-  Future<void> deleteWord(Word word) async {
-    if (!isUserLoggedIn) return;
-
-    try {
-      final response = await http.delete(
-        Uri.parse('$baseUrl/dictionary/words'),
-        headers: _getAuthHeaders(),
-        body: jsonEncode({'term': word.term}),
-      );
-
-      if (response.statusCode != 200) {
-        final error = jsonDecode(response.body);
-        throw Exception(error['message'] ?? 'Failed to delete word');
-      }
-    } catch (e) {
-      print('Error deleting word from MongoDB: $e');
-      rethrow;
     }
   }
 

@@ -4,20 +4,31 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/word.dart';
 import '../data/sample_data.dart';
 import '../services/auth_service.dart';
+import '../services/user_word_service.dart';
 
 class WordProvider with ChangeNotifier {
   // List to store all words
   List<Word> _words = [];
   static const String _prefsKey = 'dictionary_words';
   final AuthService _authService = AuthService();
+  final UserWordService _userWordService = UserWordService();
   bool _isLoading = false;
+  String? _errorMessage;
 
   // Getter for loading state
   bool get isLoading => _isLoading;
+  
+  // Getter for error message
+  String? get errorMessage => _errorMessage;
 
   WordProvider() {
-    // Load saved words when initialized
-    loadWords();
+    // Initialize AuthService and then load saved words
+    _initializeServices();
+  }
+
+  Future<void> _initializeServices() async {
+    await _authService.initialize();
+    await loadWords();
   }
 
   // Getter to provide a copy of the words list sorted alphabetically
@@ -35,30 +46,45 @@ class WordProvider with ChangeNotifier {
   // Load words based on login status (cloud storage if logged in, SharedPreferences otherwise)
   Future<void> loadWords() async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
-      // If user is logged in, load from AuthService
+      debugPrint('DEBUG: Loading words - Is logged in: ${_authService.isUserLoggedIn}');
+      
+      // If user is logged in, load from UserWordService
       if (_authService.isUserLoggedIn) {
-        _words = await _authService.loadWords();
+        debugPrint('DEBUG: Loading words from cloud storage...');
+        _words = await _userWordService.getUserWords();
+        debugPrint('DEBUG: Loaded ${_words.length} words from cloud');
 
         // If no data in cloud yet but we have local data, upload it
         if (_words.isEmpty) {
+          debugPrint('DEBUG: No words in cloud, checking local storage...');
           await _loadWordsFromLocal();
 
-          // If we have local words, upload them to AuthService
+          // If we have local words, upload them to the cloud
           if (_words.isNotEmpty) {
-            await _authService.saveWords(_words);
+            debugPrint('DEBUG: Uploading ${_words.length} local words to cloud...');
+            await _userWordService.saveAllWords(_words);
           }
         }
       } else {
+        debugPrint('DEBUG: Not logged in, loading from local storage...');
         // Not logged in, load from SharedPreferences
         await _loadWordsFromLocal();
       }
+      
+      debugPrint('DEBUG: Final word count: ${_words.length}');
     } catch (e) {
-      debugPrint('Error loading words: $e');
-      // If error occurs, load sample data
-      _loadSampleData();
+      _errorMessage = e.toString();
+      debugPrint('DEBUG: Error loading words: $e');
+      // If error occurs, load sample data or local data
+      await _loadWordsFromLocal();
+      if (_words.isEmpty) {
+        debugPrint('DEBUG: Loading sample data...');
+        _loadSampleData();
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -75,11 +101,7 @@ class WordProvider with ChangeNotifier {
         final List<dynamic> decodedList = jsonDecode(wordsJson);
         _words =
             decodedList.map((item) {
-              return Word(
-                term: item['term'],
-                translations: Map<String, String>.from(item['translations']),
-                example: item['example'],
-              );
+              return Word.fromJson(item);
             }).toList();
       } else {
         // If no saved data, load sample data on first run
@@ -105,20 +127,14 @@ class WordProvider with ChangeNotifier {
       // Save to SharedPreferences (always maintain local copy)
       final prefs = await SharedPreferences.getInstance();
       final List<Map<String, dynamic>> encodableList =
-          _words.map((word) {
-            return {
-              'term': word.term,
-              'translations': word.translations,
-              'example': word.example,
-            };
-          }).toList();
+          _words.map((word) => word.toJson()).toList();
 
       final String wordsJson = jsonEncode(encodableList);
       await prefs.setString(_prefsKey, wordsJson);
 
       // If logged in, also save to cloud
       if (_authService.isUserLoggedIn) {
-        await _authService.saveWords(_words);
+        await _userWordService.saveAllWords(_words);
       }
     } catch (e) {
       debugPrint('Error saving words: $e');
@@ -127,27 +143,59 @@ class WordProvider with ChangeNotifier {
 
   // Method to add a new word to the list
   Future<void> addWord(Word word) async {
-    _words.add(word);
-
-    // If logged in, add to cloud and then save locally
-    if (_authService.isUserLoggedIn) {
-      try {
-        await _authService.addWord(word);
-      } catch (e) {
-        debugPrint('Error adding word to cloud: $e');
+    try {
+      debugPrint('DEBUG: Adding word: ${word.term} - Is logged in: ${_authService.isUserLoggedIn}');
+      
+      // If logged in, add to cloud first
+      if (_authService.isUserLoggedIn) {
+        debugPrint('DEBUG: Adding word to cloud storage...');
+        final addedWord = await _userWordService.addWord(
+          term: word.term,
+          translations: word.translations,
+          example: word.example,
+        );
+        _words.add(addedWord);
+        debugPrint('DEBUG: Word added to cloud successfully');
+      } else {
+        debugPrint('DEBUG: Adding word to local storage only');
+        _words.add(word);
       }
-    }
 
-    await _saveWords();
-    notifyListeners();
+      await _saveWords();
+      debugPrint('DEBUG: Word saved successfully. Total words: ${_words.length}');
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      debugPrint('DEBUG: Error adding word: $e');
+      notifyListeners();
+      rethrow;
+    }
   }
 
   // Method to update an existing word
   Future<void> updateWord(int index, Word updatedWord) async {
     if (index >= 0 && index < _words.length) {
-      _words[index] = updatedWord;
-      await _saveWords();
-      notifyListeners();
+      try {
+        // If logged in, update in cloud first
+        if (_authService.isUserLoggedIn) {
+          final cloudUpdatedWord = await _userWordService.updateWord(
+            term: updatedWord.term,
+            translations: updatedWord.translations,
+            example: updatedWord.example,
+          );
+          _words[index] = cloudUpdatedWord;
+        } else {
+          _words[index] = updatedWord;
+        }
+
+        await _saveWords();
+        notifyListeners();
+      } catch (e) {
+        _errorMessage = e.toString();
+        debugPrint('Error updating word: $e');
+        notifyListeners();
+        rethrow;
+      }
     }
   }
 
@@ -155,25 +203,38 @@ class WordProvider with ChangeNotifier {
   Future<void> deleteWord(int index) async {
     if (index >= 0 && index < _words.length) {
       final wordToDelete = _words[index];
-      _words.removeAt(index);
-
-      // If logged in, delete from cloud
-      if (_authService.isUserLoggedIn) {
-        try {
-          await _authService.deleteWord(wordToDelete);
-        } catch (e) {
-          debugPrint('Error deleting word from cloud: $e');
+      debugPrint('DEBUG: Deleting word: ${wordToDelete.term} at index $index - Is logged in: ${_authService.isUserLoggedIn}');
+      
+      try {
+        // If logged in, delete from cloud first
+        if (_authService.isUserLoggedIn) {
+          debugPrint('DEBUG: Deleting word from cloud storage...');
+          await _userWordService.deleteWord(wordToDelete.term);
+          debugPrint('DEBUG: Word deleted from cloud successfully');
         }
-      }
 
-      await _saveWords();
-      notifyListeners();
+        _words.removeAt(index);
+        await _saveWords();
+        debugPrint('DEBUG: Word deleted successfully. Remaining words: ${_words.length}');
+        notifyListeners();
+      } catch (e) {
+        _errorMessage = e.toString();
+        debugPrint('DEBUG: Error deleting word: $e');
+        notifyListeners();
+        rethrow;
+      }
     }
   }
 
   // Method to find index of a word by term
   int findWordIndex(String term) {
     return _words.indexWhere((word) => word.term == term);
+  }
+
+  // Method to clear error message
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 
   // Sign out method

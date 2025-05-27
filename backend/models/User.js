@@ -19,6 +19,30 @@ const UserSchema = new mongoose.Schema({
         minlength: 6,
         select: false // Don't include password in queries by default
     },
+    words: [{
+        term: {
+            type: String,
+            required: [true, 'Please provide a term'],
+            trim: true
+        },
+        translations: {
+            type: Map,
+            of: String,
+            required: [true, 'Please provide translations']
+        },
+        example: {
+            type: String,
+            trim: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        },
+        updatedAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     createdAt: {
         type: Date,
         default: Date.now

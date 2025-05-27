@@ -75,6 +75,27 @@ class _HomePageState extends State<HomePage> {
         title: const Text('My Dictionary App'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          // Debug indicator for authentication status
+          Consumer<WordProvider>(
+            builder: (context, wordProvider, _) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: wordProvider.isUserLoggedIn ? Colors.green : Colors.orange,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  wordProvider.isUserLoggedIn ? 'ONLINE' : 'OFFLINE',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -124,6 +145,43 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: Consumer<WordProvider>(
               builder: (ctx, wordProvider, _) {
+                // Show loading indicator
+                if (wordProvider.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                // Show error message if any
+                if (wordProvider.errorMessage != null) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red.shade300,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error: ${wordProvider.errorMessage}',
+                          style: TextStyle(color: Colors.red.shade700),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            wordProvider.clearError();
+                            wordProvider.loadWords();
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 final words =
                     searchQuery.isEmpty
                         ? wordProvider.words
@@ -168,7 +226,40 @@ class _HomePageState extends State<HomePage> {
                                 icon: const Icon(Icons.delete, size: 20),
                                 onPressed: () async {
                                   if (await _confirmDelete(context)) {
-                                    wordProvider.deleteWord(providerIndex);
+                                    try {
+                                      // Show loading
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+
+                                      await wordProvider.deleteWord(providerIndex);
+                                      
+                                      // Close loading dialog
+                                      Navigator.of(context).pop();
+                                      
+                                      // Show success message
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Word deleted successfully'),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    } catch (e) {
+                                      // Close loading dialog
+                                      Navigator.of(context).pop();
+                                      
+                                      // Show error message
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Error: ${e.toString()}'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   }
                                 },
                                 color: Colors.red,
@@ -253,7 +344,7 @@ class _HomePageState extends State<HomePage> {
                             index: localIndex,
                             child: buildWordCard(word, providerIndex),
                           );
-                        }).toList(),
+                        }),
                       ],
                     );
                   },

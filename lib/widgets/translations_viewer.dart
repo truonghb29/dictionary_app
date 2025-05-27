@@ -92,7 +92,7 @@ class _TranslationsViewerState extends State<TranslationsViewer> {
                 ),
               ),
             );
-          }).toList(),
+          }),
 
         // Toggle button
         if (widget.translations.length > 1)

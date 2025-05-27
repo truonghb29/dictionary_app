@@ -1,7 +1,7 @@
 // Config file for backend API settings
 class ApiConfig {
   // Development settings
-  static const String _localBaseUrl = 'http://localhost:3001/api';
+  static const String _localBaseUrl = 'http://127.0.0.1:3001/api'; // Changed for iOS simulator compatibility
   static const String _androidEmulatorUrl = 'http://10.0.2.2:3001/api';
 
   // Production settings (replace with your actual production URL)
@@ -27,6 +27,7 @@ class ApiConfig {
   static const String profileEndpoint = '/auth/profile';
   static const String resetPasswordEndpoint = '/auth/reset-password';
   static const String wordsEndpoint = '/dictionary/words';
+  static const String userWordsEndpoint = '/user/words';
 
   // Request timeouts
   static const Duration requestTimeout = Duration(seconds: 30);

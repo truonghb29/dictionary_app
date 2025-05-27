@@ -1,13 +1,14 @@
 {
-    "name": "dictionary_app",
-    "short_name": "dictionary_app",
+    "name": "Dictionary App",
+    "short_name": "Dictionary",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#667eea",
+    "theme_color": "#667eea",
+    "description": "Ứng dụng từ điển thông minh với Flutter - Tra từ, học từ vựng hiệu quả",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "categories": ["education", "reference", "productivity"],
     "icons": [
         {
             "src": "icons/Icon-192.png",

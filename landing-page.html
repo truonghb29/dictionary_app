@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary App - Ứng dụng Từ điển Thông minh</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .hero {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 60px 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: #666;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .feature p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .download-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .download-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .download-section p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: #666;
+        }
+        
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .download-btn i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .tech-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .tech-info h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .tech-info p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .contact {
+            margin-top: 20px;
+        }
+        
+        .contact a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1.1rem;
+        }
+        
+        .contact a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .download-btn {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>📚 Dictionary App</h1>
+            <p>Ứng dụng từ điển thông minh với công nghệ Flutter & MongoDB</p>
+            <p>Tìm kiếm nhanh, học từ vựng hiệu quả, quản lý từ cá nhân</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🔍</div>
+                <h3>Tìm kiếm thông minh</h3>
+                <p>Tra cứu từ vựng nhanh chóng với thuật toán tìm kiếm thông minh. Hỗ trợ gợi ý từ và tìm kiếm mờ.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🗣️</div>
+                <h3>Phát âm chuẩn</h3>
+                <p>Nghe phát âm của người bản xứ, học cách phát âm đúng cách từng từ vựng.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">💾</div>
+                <h3>Lưu từ yêu thích</h3>
+                <p>Tạo danh sách từ vựng cá nhân, ôn tập và theo dõi tiến độ học tập của bạn.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Thống kê học tập</h3>
+                <p>Theo dõi số lượng từ đã học, thời gian học và tiến độ cá nhân của bạn.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🔐</div>
+                <h3>Tài khoản cá nhân</h3>
+                <p>Đăng ký tài khoản để đồng bộ dữ liệu và truy cập từ mọi thiết bị.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Tốc độ cao</h3>
+                <p>Ứng dụng được tối ưu hóa để có tốc độ tải nhanh và trải nghiệm mượt mà.</p>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <h2>🚀 Trải nghiệm ngay</h2>
+            <p>Chọn phiên bản phù hợp với thiết bị của bạn</p>
+            
+            <div class="download-buttons">
+                <a href="https://dictionary-app-truonghb.netlify.app" class="download-btn" target="_blank">
+                    <i>🌐</i> Web App
+                </a>
+                <a href="#" class="download-btn">
+                    <i>📱</i> Android APK
+                </a>
+                <a href="#" class="download-btn">
+                    <i>📲</i> iOS App
+                </a>
+            </div>
+            
+            <div class="tech-info">
+                <h3>🛠️ Thông tin kỹ thuật</h3>
+                <p><strong>Frontend:</strong> Flutter (Dart) <span class="status">✅ Online</span></p>
+                <p><strong>Backend:</strong> Node.js + Express <span class="status">✅ Online</span></p>
+                <p><strong>Database:</strong> MongoDB Atlas <span class="status">✅ Online</span></p>
+                <p><strong>Hosting:</strong> Netlify + Render <span class="status">✅ Online</span></p>
+                <p><strong>API:</strong> RESTful API với JWT Authentication</p>
+            </div>
+        </div>
+
+        <footer>
+            <h3>📖 Dictionary App</h3>
+            <p>Phát triển bởi <strong>Trương Hữu Bính</strong></p>
+            <p>Đồ án môn Chuyên ngành - Khoa Công nghệ Thông tin</p>
+            
+            <div class="contact">
+                <a href="mailto:truonghb29@example.com">📧 Email</a>
+                <a href="https://github.com/truonghb29/dictionary_app" target="_blank">💻 GitHub</a>
+                <a href="#" target="_blank">📱 Demo</a>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8;">
+                © 2024 Dictionary App. Được phát triển với ❤️ bằng Flutter & Node.js
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

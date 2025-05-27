@@ -4,11 +4,11 @@ class ApiConfig {
   static const String _localBaseUrl = 'http://127.0.0.1:3001/api'; // Changed for iOS simulator compatibility
   static const String _androidEmulatorUrl = 'http://10.0.2.2:3001/api';
 
-  // Production settings - Update this with your actual Render URL after deployment
-  static const String _productionBaseUrl = 'https://dictionary-app-backend.onrender.com/api';
+  // Production settings - Updated with actual Render URL
+  static const String _productionBaseUrl = 'https://dictionary-app-backend-240t.onrender.com/api';
 
   // Current environment - Set to false for production release
-  static const bool _isDevelopment = false; // Changed to production mode
+  static const bool _isDevelopment = false; // Production mode for mobile release
 
   // Get the appropriate base URL based on environment and platform
   static String get baseUrl {

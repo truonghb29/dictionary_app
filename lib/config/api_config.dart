@@ -4,11 +4,11 @@ class ApiConfig {
   static const String _localBaseUrl = 'http://127.0.0.1:3001/api'; // Changed for iOS simulator compatibility
   static const String _androidEmulatorUrl = 'http://10.0.2.2:3001/api';
 
-  // Production settings (replace with your actual production URL)
-  static const String _productionBaseUrl = 'https://your-app.herokuapp.com/api';
+  // Production settings - Update this with your actual Render URL after deployment
+  static const String _productionBaseUrl = 'https://dictionary-app-backend.onrender.com/api';
 
-  // Current environment
-  static const bool _isDevelopment = true; // Set to false for production
+  // Current environment - Set to false for production release
+  static const bool _isDevelopment = false; // Changed to production mode
 
   // Get the appropriate base URL based on environment and platform
   static String get baseUrl {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'admin_dashboard_page.dart';
 import 'home_page.dart';
 import 'login_page.dart';
 
@@ -59,9 +60,17 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
-    // Navigate to appropriate page
-    final Widget destinationPage =
-        authService.isUserLoggedIn ? const HomePage() : const LoginPage();
+    // Navigate to appropriate page based on user role
+    Widget destinationPage;
+    if (authService.isUserLoggedIn) {
+      if (authService.isAdmin) {
+        destinationPage = const AdminDashboardPage();
+      } else {
+        destinationPage = const HomePage();
+      }
+    } else {
+      destinationPage = const LoginPage();
+    }
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(

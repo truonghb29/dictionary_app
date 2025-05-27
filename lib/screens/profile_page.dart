@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'admin_dashboard_page.dart';
 import 'login_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -75,6 +76,24 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 4),
 
+            // User role
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _authService.isAdmin ? Colors.red.shade100 : Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Role: ${user?['role']?.toString().toUpperCase() ?? 'USER'}',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: _authService.isAdmin ? Colors.red.shade700 : Colors.blue.shade700,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+
             // Account creation date
             if (user?['createdAt'] != null)
               Text(
@@ -89,6 +108,25 @@ class ProfilePage extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             const SizedBox(height: 40),
+
+            // Admin panel section (only for admin users)
+            if (_authService.isAdmin) ...[
+              ListTile(
+                title: const Text('Admin Dashboard'),
+                subtitle: const Text('Access admin panel and analytics'),
+                leading: const Icon(Icons.admin_panel_settings, color: Colors.red),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminDashboardPage(),
+                    ),
+                  );
+                },
+              ),
+              const Divider(),
+            ],
 
             // Account information section
             const ListTile(

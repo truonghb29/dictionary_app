@@ -23,8 +23,14 @@ class AuthService {
   // Get current user profile
   Map<String, dynamic>? get currentUser => _userProfile;
 
+  // Get current token
+  String? get token => _token;
+
   // Check if user is logged in
   bool get isUserLoggedIn => _token != null && _userId != null;
+
+  // Check if current user is admin
+  bool get isAdmin => _userProfile?['role'] == 'admin';
 
   // Initialize service by loading stored token
   Future<void> initialize() async {

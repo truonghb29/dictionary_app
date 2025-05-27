@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../providers/word_provider.dart';
+import 'admin_dashboard_page.dart';
 import 'home_page.dart';
 import 'register_page.dart';
 
@@ -51,10 +52,17 @@ class _LoginPageState extends State<LoginPage> {
       final wordProvider = Provider.of<WordProvider>(context, listen: false);
       await wordProvider.loadWords();
 
-      // Navigate to home page on success
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+      // Navigate based on user role
+      Widget destinationPage;
+      if (_authService.isAdmin) {
+        destinationPage = const AdminDashboardPage();
+      } else {
+        destinationPage = const HomePage();
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => destinationPage),
+      );
     } catch (e) {
       // Handle authentication errors
       setState(() {

@@ -19,6 +19,11 @@ const UserSchema = new mongoose.Schema({
         minlength: 6,
         select: false // Don't include password in queries by default
     },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
     words: [{
         term: {
             type: String,

@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'providers/word_provider.dart';
 import 'services/auth_service.dart';
 import 'screens/splash_screen.dart';
+import 'screens/login_page.dart';
+import 'screens/home_page.dart';
+import 'screens/admin_dashboard_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +66,11 @@ class MyApp extends StatelessWidget {
         ),
         themeMode: ThemeMode.system,
         home: const SplashScreen(),
+        routes: {
+          '/login': (context) => const LoginPage(),
+          '/home': (context) => const HomePage(),
+          '/admin': (context) => const AdminDashboardPage(),
+        },
         debugShowCheckedModeBanner: false,
       ),
     );

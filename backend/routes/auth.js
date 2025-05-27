@@ -37,6 +37,7 @@ router.post('/register', async (req, res) => {
                 user: {
                     _id: user._id,
                     email: user.email,
+                    role: user.role,
                     createdAt: user.createdAt,
                 },
             });
@@ -77,6 +78,7 @@ router.post('/login', async (req, res) => {
                 user: {
                     _id: user._id,
                     email: user.email,
+                    role: user.role,
                     lastLogin: user.lastLogin,
                 },
             });
@@ -107,6 +109,7 @@ router.get('/profile', authMiddleware, async (req, res) => {
             user: {
                 _id: user._id,
                 email: user.email,
+                role: user.role,
                 createdAt: user.createdAt,
                 lastLogin: user.lastLogin,
             },

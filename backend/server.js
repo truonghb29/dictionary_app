@@ -2,13 +2,18 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
+const { createAdminUser } = require('./utils/createAdmin');
 
 // Import routes
 const authRoutes = require('./routes/auth');
 const userWordsRoutes = require('./routes/user-words');
+const adminRoutes = require('./routes/admin');
 
 // Connect to database
-connectDB();
+connectDB().then(() => {
+    // Create admin user if it doesn't exist
+    createAdminUser();
+});
 
 const app = express();
 
@@ -24,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userWordsRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

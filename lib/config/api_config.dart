@@ -28,6 +28,12 @@ class ApiConfig {
   static const String resetPasswordEndpoint = '/auth/reset-password';
   static const String wordsEndpoint = '/dictionary/words';
   static const String userWordsEndpoint = '/user/words';
+  
+  // Admin endpoints
+  static const String adminDashboardEndpoint = '/admin/dashboard';
+  static const String adminAnalyticsEndpoint = '/admin/analytics';
+  static const String adminUsersEndpoint = '/admin/users';
+  static const String adminAnalyticsSaveEndpoint = '/admin/analytics/save';
 
   // Request timeouts
   static const Duration requestTimeout = Duration(seconds: 30);

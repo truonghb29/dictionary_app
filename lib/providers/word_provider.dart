@@ -43,6 +43,12 @@ class WordProvider with ChangeNotifier {
   // Check if user is logged in
   bool get isUserLoggedIn => _authService.isUserLoggedIn;
 
+  // Get current user ID to track user changes
+  String? get currentUserId => _authService.userId;
+
+  // Track the last logged-in user to detect user switches
+  String? _lastUserId;
+
   // Load words based on login status (cloud storage if logged in, SharedPreferences otherwise)
   Future<void> loadWords() async {
     _isLoading = true;
@@ -54,21 +60,22 @@ class WordProvider with ChangeNotifier {
       
       // If user is logged in, load from UserWordService
       if (_authService.isUserLoggedIn) {
-        debugPrint('DEBUG: Loading words from cloud storage...');
+        final currentUser = currentUserId;
+        
+        // Check if user has changed - if so, clear local cache
+        if (_lastUserId != null && _lastUserId != currentUser) {
+          debugPrint('DEBUG: User changed from $_lastUserId to $currentUser - clearing local cache');
+          await _clearLocalStorage();
+          _words.clear();
+        }
+        _lastUserId = currentUser;
+
+        debugPrint('DEBUG: Loading words from cloud storage for user: $currentUser');
         _words = await _userWordService.getUserWords();
         debugPrint('DEBUG: Loaded ${_words.length} words from cloud');
 
-        // If no data in cloud yet but we have local data, upload it
-        if (_words.isEmpty) {
-          debugPrint('DEBUG: No words in cloud, checking local storage...');
-          await _loadWordsFromLocal();
-
-          // If we have local words, upload them to the cloud
-          if (_words.isNotEmpty) {
-            debugPrint('DEBUG: Uploading ${_words.length} local words to cloud...');
-            await _userWordService.saveAllWords(_words);
-          }
-        }
+        // Save current user's words to local storage as backup (don't upload old data)
+        await _saveWordsToLocal();
       } else {
         debugPrint('DEBUG: Not logged in, loading from local storage...');
         // Not logged in, load from SharedPreferences
@@ -119,6 +126,30 @@ class WordProvider with ChangeNotifier {
     _words = SampleData.getSampleWords();
     _saveWords();
     notifyListeners();
+  }
+
+  // Helper method to save words to local storage only
+  Future<void> _saveWordsToLocal() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final List<Map<String, dynamic>> encodableList =
+          _words.map((word) => word.toJson()).toList();
+      final String wordsJson = jsonEncode(encodableList);
+      await prefs.setString(_prefsKey, wordsJson);
+    } catch (e) {
+      debugPrint('Error saving words to local storage: $e');
+    }
+  }
+
+  // Helper method to clear local storage
+  Future<void> _clearLocalStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefsKey);
+      debugPrint('DEBUG: Local storage cleared');
+    } catch (e) {
+      debugPrint('Error clearing local storage: $e');
+    }
   }
 
   // Save words to storage (cloud storage if logged in, SharedPreferences otherwise)
@@ -240,7 +271,10 @@ class WordProvider with ChangeNotifier {
   // Sign out method
   Future<void> signOut() async {
     await _authService.signOut();
-    // Reload words from local storage after sign out
+    _lastUserId = null; // Clear user tracking
+    // Clear local cache and reload
+    await _clearLocalStorage();
+    _words.clear();
     await _loadWordsFromLocal();
     notifyListeners();
   }
